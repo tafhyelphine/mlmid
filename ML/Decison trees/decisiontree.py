@@ -31,6 +31,7 @@ plot_tree(dt, feature_names=X.columns, class_names=["No Disease", "Has Disease"]
 plt.title("Decision Tree Visualization")
 plt.show()
 
+# --------------T--------
 # Get cost complexity pruning path
 path = dt.cost_complexity_pruning_path(X_train, y_train)
 ccp_alphas = path.ccp_alphas
@@ -64,3 +65,25 @@ dt_postprune = DecisionTreeClassifier(random_state=42, ccp_alpha=best_alpha)
 dt_postprune.fit(X_train, y_train)
 y_pred_post = dt_postprune.predict(X_test)
 print(f"Post-pruned Tree Accuracy: {accuracy_score(y_test, y_pred_post):.4f}")
+
+#-----------S--------
+clf = DecisionTreeClassifier(random_state=42)
+path = clf.cost_complexity_pruning_path(X_train, y_train)
+ccp_alphas = path.ccp_alphas
+models = [DecisionTreeClassifier(random_state=42, ccp_alpha=alpha).fit(X_train, y_train) for alpha in ccp_alphas]
+accuracies = [accuracy_score(y_test, model.predict(X_test)) for model in models]
+
+# Optional: Plot alpha vs accuracy
+plt.plot(ccp_alphas, accuracies, marker='o')
+plt.xlabel("ccp_alpha")
+plt.ylabel("Accuracy")
+plt.title("Post-Pruning: Accuracy vs ccp_alpha")
+plt.show()
+
+# Pick best model
+best_index = accuracies.index(max(accuracies))
+best_model = models[best_index]
+plt.figure(figsize=(12, 6))
+plot_tree(best_model, feature_names=X.columns, class_names=["No Disease", "Has Disease"], filled=True)
+plt.title("Post-Pruned Decision Tree")
+plt.show()
